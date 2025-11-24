@@ -1,0 +1,999 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Zomato Clone - Best Food in Pune</title>
+    <style>
+      /* --- CSS Reset & Variables --- */
+      :root {
+        --zomato-red: #ef4f5f;
+        --zomato-black: #1c1c1c;
+        --gray-100: #f8f8f8;
+        --gray-200: #e8e8e8;
+        --gray-500: #9c9c9c;
+        --gray-700: #696969;
+        --shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+        --hover-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          Helvetica, Arial, sans-serif;
+      }
+
+      body {
+        color: var(--zomato-black);
+      }
+
+      a {
+        text-decoration: none;
+        color: inherit;
+      }
+      ul {
+        list-style: none;
+      }
+      button,
+      input {
+        outline: none;
+        border: none;
+        background: none;
+      }
+
+      /* Helper Classes */
+      .hidden {
+        display: none !important;
+      }
+      .flex {
+        display: flex;
+      }
+      .cursor-pointer {
+        cursor: pointer;
+      }
+
+      /* --- Utility Classes --- */
+      .container {
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 0 1rem;
+      }
+
+      /* --- Navbar --- */
+      .navbar {
+        position: sticky;
+        top: 0;
+        background: white;
+        z-index: 100;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        padding: 1rem 0;
+      }
+
+      .nav-content {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        height: 40px;
+      }
+
+      .logo {
+        font-size: 2rem;
+        font-weight: 900;
+        font-style: italic;
+        letter-spacing: -1px;
+        cursor: pointer;
+      }
+
+      .search-bar {
+        display: none;
+        flex: 1;
+        max-width: 500px;
+        background: white;
+        border: 1px solid var(--gray-200);
+        border-radius: 8px;
+        box-shadow: var(--shadow);
+        height: 48px;
+        margin: 0 2rem;
+        align-items: center;
+        padding: 0 1rem;
+      }
+
+      @media (min-width: 768px) {
+        .search-bar {
+          display: flex;
+        }
+      }
+
+      .location {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: var(--gray-700);
+        font-size: 0.9rem;
+        border-right: 1px solid var(--gray-200);
+        padding-right: 1rem;
+        margin-right: 1rem;
+        width: 35%;
+      }
+
+      .search-input-wrapper {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+
+      .search-input-wrapper input {
+        width: 100%;
+        font-size: 0.9rem;
+      }
+
+      .nav-links {
+        display: flex;
+        gap: 1.5rem;
+        font-size: 1.1rem;
+        font-weight: 300;
+        color: var(--gray-700);
+      }
+
+      .nav-links button {
+        cursor: pointer;
+        font-size: 1.1rem;
+        color: var(--gray-700);
+      }
+
+      .nav-links button:hover {
+        color: var(--zomato-black);
+      }
+
+      /* --- Category Tabs --- */
+      .tabs-section {
+        position: sticky;
+        top: 72px;
+        background: white;
+        z-index: 90;
+        padding-top: 1rem;
+        border-bottom: 1px solid var(--gray-200);
+      }
+
+      .tabs {
+        display: flex;
+        gap: 2rem;
+      }
+
+      .tab {
+        display: flex;
+        align-items: center;
+        gap: 0.8rem;
+        padding-bottom: 1rem;
+        cursor: pointer;
+        opacity: 0.6;
+        border-bottom: 2px solid transparent;
+        transition: all 0.3s;
+      }
+
+      .tab.active {
+        opacity: 1;
+        color: var(--zomato-red);
+        border-bottom-color: var(--zomato-red);
+      }
+
+      .tab-icon {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        background: var(--gray-100);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: background 0.3s;
+      }
+
+      .tab.active .tab-icon {
+        background: #fceec0; /* Yellowish for delivery */
+      }
+
+      .tab[data-type="Dining"] .tab-icon.active-icon {
+        background: #e5f3f3;
+      }
+      .tab[data-type="Nightlife"] .tab-icon.active-icon {
+        background: #edf4ff;
+      }
+
+      .tab-name {
+        font-weight: 500;
+        font-size: 1.2rem;
+      }
+
+      /* --- Main View Content --- */
+      .filters-section {
+        padding: 1.5rem 0;
+      }
+
+      .filters-list {
+        display: flex;
+        gap: 1rem;
+        overflow-x: auto;
+        padding-bottom: 0.5rem;
+      }
+
+      .filter-btn {
+        border: 1px solid var(--gray-200);
+        padding: 0.6rem 1rem;
+        border-radius: 8px;
+        color: var(--gray-500);
+        font-size: 0.9rem;
+        white-space: nowrap;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: background 0.2s;
+      }
+
+      .filter-btn:hover {
+        background: var(--gray-100);
+      }
+
+      .hero-text {
+        font-size: 1.8rem;
+        font-weight: 600;
+        margin: 1rem 0 2rem;
+      }
+
+      .grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 2rem;
+        padding-bottom: 4rem;
+      }
+
+      @media (min-width: 640px) {
+        .grid {
+          grid-template-columns: repeat(2, 1fr);
+        }
+      }
+      @media (min-width: 900px) {
+        .grid {
+          grid-template-columns: repeat(3, 1fr);
+        }
+      }
+
+      /* --- Cards --- */
+      .card {
+        border-radius: 1rem;
+        overflow: hidden;
+        transition: box-shadow 0.3s;
+        cursor: pointer;
+      }
+      .card:hover {
+        box-shadow: var(--hover-shadow);
+      }
+
+      .card-img-wrap {
+        height: 240px;
+        position: relative;
+      }
+      .card-img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+
+      .promoted-badge {
+        position: absolute;
+        top: 1rem;
+        left: 1rem;
+        background: rgba(0, 0, 0, 0.6);
+        color: white;
+        font-size: 0.7rem;
+        padding: 2px 6px;
+        border-radius: 4px;
+        text-transform: uppercase;
+      }
+      .discount-badge {
+        position: absolute;
+        bottom: 1rem;
+        left: 0;
+        background: #256fef;
+        color: white;
+        font-size: 0.8rem;
+        font-weight: 700;
+        padding: 2px 8px;
+        border-top-right-radius: 4px;
+        border-bottom-right-radius: 4px;
+      }
+      .time-badge {
+        position: absolute;
+        bottom: 1rem;
+        right: 1rem;
+        background: rgba(255, 255, 255, 0.8);
+        padding: 2px 6px;
+        border-radius: 4px;
+        font-size: 0.8rem;
+        font-weight: 600;
+      }
+
+      .card-content {
+        padding: 0.8rem;
+      }
+      .row {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 0.5rem;
+      }
+      .res-name {
+        font-size: 1.1rem;
+        font-weight: 600;
+        width: 70%;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .rating {
+        background: #24963f;
+        color: white;
+        font-size: 0.8rem;
+        font-weight: 700;
+        padding: 2px 6px;
+        border-radius: 6px;
+        display: flex;
+        align-items: center;
+        gap: 2px;
+      }
+      .cuisine {
+        color: var(--gray-700);
+        font-size: 0.9rem;
+        width: 60%;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .price {
+        color: var(--gray-700);
+        font-size: 0.9rem;
+      }
+      .card-footer {
+        border-top: 1px solid var(--gray-200);
+        padding-top: 0.8rem;
+        margin-top: 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+      .footer-text {
+        font-size: 0.75rem;
+        color: var(--gray-500);
+        font-weight: 500;
+      }
+
+      /* --- Restaurant Detail View --- */
+      #restaurant-view {
+        background: white;
+        min-height: 100vh;
+      }
+      .res-header {
+        background: white;
+        position: sticky;
+        top: 0;
+        z-index: 50;
+        padding: 1rem 0;
+        border-bottom: 1px solid var(--gray-200);
+      }
+      .breadcrumb {
+        font-size: 0.8rem;
+        color: var(--gray-500);
+        margin-bottom: 0.5rem;
+      }
+      .breadcrumb span {
+        cursor: pointer;
+      }
+      .breadcrumb span:hover {
+        color: var(--zomato-red);
+      }
+      .res-title {
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+      }
+      .menu-item {
+        display: flex;
+        justify-content: space-between;
+        padding: 2rem 0;
+        border-bottom: 1px dashed var(--gray-200);
+      }
+      .menu-info h4 {
+        font-size: 1.2rem;
+        margin-bottom: 0.5rem;
+      }
+      .menu-img-box {
+        width: 120px;
+        height: 120px;
+        position: relative;
+        border-radius: 10px;
+        overflow: hidden;
+      }
+      .add-btn {
+        position: absolute;
+        bottom: -10px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: white;
+        border: 1px solid var(--gray-200);
+        color: var(--zomato-red);
+        font-weight: 700;
+        padding: 0.5rem 1.5rem;
+        border-radius: 6px;
+        cursor: pointer;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+      }
+      .add-btn:hover {
+        background: var(--gray-100);
+      }
+
+      /* --- Modal --- */
+      .modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.7);
+        backdrop-filter: blur(2px);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        z-index: 1000;
+        opacity: 0;
+        transition: opacity 0.3s;
+      }
+      .modal-overlay.show {
+        display: flex;
+        opacity: 1;
+      }
+      .modal-box {
+        background: white;
+        width: 100%;
+        max-width: 450px;
+        border-radius: 8px;
+        overflow: hidden;
+      }
+      .modal-header {
+        display: flex;
+        justify-content: space-between;
+        padding: 1.5rem;
+      }
+      .input-group {
+        border: 1px solid var(--gray-500);
+        border-radius: 6px;
+        display: flex;
+        overflow: hidden;
+        margin-bottom: 1.5rem;
+      }
+      .input-group input {
+        flex: 1;
+        padding: 0.8rem;
+        font-size: 1rem;
+      }
+      .btn-primary {
+        width: 100%;
+        background: var(--zomato-red);
+        color: white;
+        padding: 0.9rem;
+        border-radius: 6px;
+        font-weight: 600;
+        cursor: pointer;
+      }
+
+      /* --- Icons --- */
+      .icon {
+        width: 20px;
+        height: 20px;
+        stroke: currentColor;
+        stroke-width: 2;
+        fill: none;
+      }
+      .fill-star {
+        fill: white;
+        stroke: none;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Navbar -->
+    <nav class="navbar">
+      <div class="container nav-content">
+        <div class="logo" onclick="app.goHome()">zomato</div>
+
+        <div class="search-bar">
+          <div class="location">
+            <svg
+              class="icon"
+              style="color: #ef4f5f; width: 18px"
+              viewBox="0 0 24 24"
+            >
+              <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+              <circle cx="12" cy="10" r="3"></circle>
+            </svg>
+            <span>Pune, India</span>
+          </div>
+          <div class="search-input-wrapper">
+            <svg
+              class="icon"
+              style="color: #828282; width: 18px"
+              viewBox="0 0 24 24"
+            >
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+            <input
+              type="text"
+              id="search-input"
+              placeholder="Search for restaurant, cuisine or a dish"
+            />
+          </div>
+        </div>
+
+        <div class="nav-links">
+          <button onclick="app.toggleModal(true)">Log in</button>
+          <button onclick="app.toggleModal(true)">Sign up</button>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Main App Container -->
+    <div id="main-app">
+      <!-- VIEW: HOME -->
+      <div id="home-view">
+        <!-- Tabs -->
+        <div class="tabs-section">
+          <div class="container">
+            <div class="tabs">
+              <div
+                class="tab active"
+                data-type="Delivery"
+                onclick="app.switchTab('Delivery')"
+              >
+                <div class="tab-icon">
+                  <svg
+                    width="30"
+                    height="30"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="#ef4f5f"
+                    stroke-width="2"
+                  >
+                    <rect x="1" y="3" width="15" height="13"></rect>
+                    <polygon
+                      points="16 8 20 8 23 11 23 16 16 16 16 8"
+                    ></polygon>
+                    <circle cx="5.5" cy="18.5" r="2.5"></circle>
+                    <circle cx="18.5" cy="18.5" r="2.5"></circle>
+                  </svg>
+                </div>
+                <span class="tab-name">Delivery</span>
+              </div>
+              <div
+                class="tab"
+                data-type="Dining"
+                onclick="app.switchTab('Dining')"
+              >
+                <div class="tab-icon">
+                  <svg
+                    width="30"
+                    height="30"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="#696969"
+                    stroke-width="2"
+                  >
+                    <path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"></path>
+                    <path d="M7 2v20"></path>
+                    <path
+                      d="M21 15V2v0a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7"
+                    ></path>
+                  </svg>
+                </div>
+                <span class="tab-name" style="color: var(--gray-700)"
+                  >Dining Out</span
+                >
+              </div>
+              <div
+                class="tab"
+                data-type="Nightlife"
+                onclick="app.switchTab('Nightlife')"
+              >
+                <div class="tab-icon">
+                  <svg
+                    width="30"
+                    height="30"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="#696969"
+                    stroke-width="2"
+                  >
+                    <path
+                      d="M8 21h8a2 2 0 0 0 2-2v-9a2 2 0 0 0-2-2h-8a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2Z"
+                    ></path>
+                    <path d="M8 10V3a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v7"></path>
+                  </svg>
+                </div>
+                <span class="tab-name" style="color: var(--gray-700)"
+                  >Nightlife</span
+                >
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="container">
+          <div class="filters-section">
+            <div class="filters-list">
+              <button class="filter-btn">Filters</button>
+              <button class="filter-btn">Rating: 4.0+</button>
+              <button class="filter-btn">Pure Veg</button>
+            </div>
+          </div>
+
+          <h2 class="hero-text" id="hero-text">Delivery Restaurants in Pune</h2>
+
+          <!-- Dynamic Grid -->
+          <div class="grid" id="restaurant-grid">
+            <!-- Javascript will populate this -->
+          </div>
+        </div>
+      </div>
+
+      <!-- VIEW: RESTAURANT DETAILS -->
+      <div id="restaurant-view" class="hidden">
+        <div class="res-header">
+          <div class="container">
+            <div class="breadcrumb">
+              <span onclick="app.goHome()">Home</span> /
+              <span onclick="app.goHome()">Pune</span> /
+              <span id="detail-name-bread" style="color: #9c9c9c">...</span>
+            </div>
+            <div
+              style="
+                display: flex;
+                justify-content: space-between;
+                align-items: flex-start;
+              "
+            >
+              <div>
+                <h1 class="res-title" id="detail-name">Restaurant Name</h1>
+                <p style="color: #696969" id="detail-cuisine">Cuisine</p>
+                <p
+                  style="color: #9c9c9c; font-size: 0.9rem; margin-top: 0.5rem"
+                >
+                  Camp, Pune • 2.5km
+                </p>
+              </div>
+              <div
+                class="rating"
+                style="font-size: 1.2rem; padding: 0.5rem 1rem"
+              >
+                <span id="detail-rating">4.0</span>
+                <svg class="icon fill-star" viewBox="0 0 24 24">
+                  <polygon
+                    points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"
+                  ></polygon>
+                </svg>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="container" style="padding-top: 2rem">
+          <h3 style="font-size: 1.5rem; margin-bottom: 1.5rem">Recommended</h3>
+          <div id="menu-list">
+            <!-- JS Populates Menu -->
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Login Modal -->
+    <div class="modal-overlay" id="login-modal">
+      <div class="modal-box">
+        <div class="modal-header">
+          <h2 style="font-size: 1.5rem; color: #333">Login</h2>
+          <span
+            class="cursor-pointer"
+            onclick="app.toggleModal(false)"
+            style="font-size: 1.5rem"
+            >&times;</span
+          >
+        </div>
+        <div style="padding: 0 1.5rem 2rem">
+          <div class="input-group">
+            <div
+              style="
+                padding: 0.8rem;
+                background: white;
+                border-right: 1px solid #e8e8e8;
+              "
+            >
+              +91
+            </div>
+            <input type="tel" placeholder="Phone number" />
+          </div>
+          <button class="btn-primary">Send One Time Password</button>
+          <div
+            style="
+              display: flex;
+              align-items: center;
+              margin: 1.5rem 0;
+              color: #9c9c9c;
+            "
+          >
+            <div style="height: 1px; background: #e8e8e8; flex: 1"></div>
+            <span style="padding: 0 0.5rem">or</span>
+            <div style="height: 1px; background: #e8e8e8; flex: 1"></div>
+          </div>
+          <button
+            style="
+              width: 100%;
+              padding: 0.8rem;
+              border: 1px solid #e8e8e8;
+              border-radius: 6px;
+              display: flex;
+              justify-content: center;
+              align-items: center;
+              gap: 0.5rem;
+              cursor: pointer;
+            "
+          >
+            <span style="color: #ef4f5f; font-weight: bold">G</span> Continue
+            with Google
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- --- JAVASCRIPT LOGIC --- -->
+    <script>
+      const MOCK_DATA = [
+        {
+          id: 1,
+          name: "La Pino'z Pizza",
+          rating: 4.1,
+          cuisine: "Pizza, Pasta, Italian",
+          price: "₹200 for one",
+          time: "30 min",
+          image:
+            "https://images.unsplash.com/photo-1628840042765-356cda07504e?auto=format&fit=crop&w=600&q=80",
+          promoted: true,
+          discount: "50% OFF",
+          type: "Delivery",
+          menu: [
+            {
+              name: "Farm Villa Pizza",
+              price: 249,
+              desc: "Fresh veggies on cheesy crust",
+              img: "https://images.unsplash.com/photo-1513104890138-7c749659a591?auto=format&fit=crop&w=200&q=80",
+            },
+            {
+              name: "Cheesy Garlic Bread",
+              price: 149,
+              desc: "Baked to perfection",
+              img: "https://images.unsplash.com/photo-1573140247632-f84660f67627?auto=format&fit=crop&w=200&q=80",
+            },
+          ],
+        },
+        {
+          id: 2,
+          name: "Burger King",
+          rating: 4.3,
+          cuisine: "Burger, American",
+          price: "₹150 for one",
+          time: "25 min",
+          image:
+            "https://images.unsplash.com/photo-1571091718767-18b5b1457add?auto=format&fit=crop&w=600&q=80",
+          promoted: false,
+          discount: "Free Whopper",
+          type: "Delivery",
+          menu: [
+            {
+              name: "Whopper",
+              price: 199,
+              desc: "Flame grilled goodness",
+              img: "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=200&q=80",
+            },
+          ],
+        },
+        {
+          id: 3,
+          name: "Agent Jack's Bar",
+          rating: 4.5,
+          cuisine: "North Indian, Finger Food",
+          price: "₹1500 for two",
+          time: "2 km",
+          image:
+            "https://images.unsplash.com/photo-1514933651103-005eec06c04b?auto=format&fit=crop&w=600&q=80",
+          promoted: false,
+          discount: "",
+          type: "Dining",
+          menu: [
+            {
+              name: "Crispy Corn",
+              price: 250,
+              desc: "Spicy bar snack",
+              img: "https://images.unsplash.com/photo-1606502973842-f64bc2f6d05e?auto=format&fit=crop&w=200&q=80",
+            },
+          ],
+        },
+        {
+          id: 4,
+          name: "Biryani Blues",
+          rating: 3.9,
+          cuisine: "Biryani, Hyderabadi",
+          price: "₹350 for one",
+          time: "45 min",
+          image:
+            "https://images.unsplash.com/photo-1589302168068-964664d93dc0?auto=format&fit=crop&w=600&q=80",
+          promoted: true,
+          discount: "Flat ₹125 OFF",
+          type: "Delivery",
+          menu: [
+            {
+              name: "Chicken Dum Biryani",
+              price: 349,
+              desc: "Aromatic spices",
+              img: "https://images.unsplash.com/photo-1633945274405-b6c8069047b0?auto=format&fit=crop&w=200&q=80",
+            },
+          ],
+        },
+      ];
+
+      const app = {
+        state: {
+          activeTab: "Delivery",
+          restaurants: MOCK_DATA,
+        },
+
+        init() {
+          this.renderGrid();
+        },
+
+        // --- Navigation Logic ---
+        switchTab(type) {
+          this.state.activeTab = type;
+
+          // Update Tab UI
+          document.querySelectorAll(".tab").forEach((el) => {
+            el.classList.remove("active");
+            // Reset icon color logic
+            el.querySelector(".tab-icon").classList.remove("active-icon");
+            el.querySelector("svg").setAttribute("stroke", "#696969");
+            el.querySelector(".tab-name").style.color = "#696969";
+          });
+
+          const activeEl = document.querySelector(`.tab[data-type="${type}"]`);
+          activeEl.classList.add("active");
+          activeEl.querySelector(".tab-icon").classList.add("active-icon");
+          activeEl.querySelector("svg").setAttribute("stroke", "#ef4f5f");
+          activeEl.querySelector(".tab-name").style.color = "#ef4f5f";
+
+          // Update Hero Text
+          const titles = {
+            Delivery: "Delivery Restaurants in Pune",
+            Dining: "Dining Out in Pune",
+            Nightlife: "Nightlife in Pune",
+          };
+          document.getElementById("hero-text").innerText = titles[type];
+
+          this.renderGrid();
+        },
+
+        goHome() {
+          document.getElementById("home-view").classList.remove("hidden");
+          document.getElementById("restaurant-view").classList.add("hidden");
+          window.scrollTo(0, 0);
+        },
+
+        openRestaurant(id) {
+          const res = this.state.restaurants.find((r) => r.id === id);
+          if (!res) return;
+
+          // Populate Details
+          document.getElementById("detail-name").innerText = res.name;
+          document.getElementById("detail-name-bread").innerText = res.name;
+          document.getElementById("detail-cuisine").innerText = res.cuisine;
+          document.getElementById("detail-rating").innerText = res.rating;
+
+          // Populate Menu
+          const menuContainer = document.getElementById("menu-list");
+          menuContainer.innerHTML = res.menu
+            .map(
+              (item) => `
+                    <div class="menu-item">
+                        <div class="menu-info">
+                            <h4>${item.name}</h4>
+                            <p style="color:#696969; font-size:0.9rem;">₹${item.price}</p>
+                            <p style="color:#9c9c9c; font-size:0.85rem; margin-top:0.5rem;">${item.desc}</p>
+                        </div>
+                        <div class="menu-img-box">
+                            <img src="${item.img}" style="width:100%; height:100%; object-fit:cover;">
+                            <button class="add-btn">ADD</button>
+                        </div>
+                    </div>
+                `
+            )
+            .join("");
+
+          // Switch View
+          document.getElementById("home-view").classList.add("hidden");
+          document.getElementById("restaurant-view").classList.remove("hidden");
+          window.scrollTo(0, 0);
+        },
+
+        toggleModal(show) {
+          const modal = document.getElementById("login-modal");
+          if (show) modal.classList.add("show");
+          else modal.classList.remove("show");
+        },
+
+        // --- Render Logic ---
+        renderGrid() {
+          const grid = document.getElementById("restaurant-grid");
+          const filtered = this.state.restaurants.filter(
+            (r) => r.type === this.state.activeTab
+          );
+
+          if (filtered.length === 0) {
+            grid.innerHTML = `<p style="grid-column: 1/-1; text-align:center; color:#9c9c9c;">No restaurants found in this category.</p>`;
+            return;
+          }
+
+          grid.innerHTML = filtered
+            .map(
+              (res) => `
+                    <div class="card" onclick="app.openRestaurant(${res.id})">
+                        <div class="card-img-wrap">
+                            <img src="${res.image}" alt="${
+                res.name
+              }" class="card-img">
+                            ${
+                              res.promoted
+                                ? '<div class="promoted-badge">Promoted</div>'
+                                : ""
+                            }
+                            ${
+                              res.discount
+                                ? `<div class="discount-badge">${res.discount}</div>`
+                                : ""
+                            }
+                            <div class="time-badge">${res.time}</div>
+                        </div>
+                        <div class="card-content">
+                            <div class="row">
+                                <h3 class="res-name">${res.name}</h3>
+                                <div class="rating">${
+                                  res.rating
+                                } <svg class="icon fill-star" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg></div>
+                            </div>
+                            <div class="row">
+                                <p class="cuisine">${res.cuisine}</p>
+                                <p class="price">${res.price}</p>
+                            </div>
+                            <div class="card-footer">
+                                <img src="https://cdn-icons-png.flaticon.com/512/1046/1046784.png" style="width:18px;height:18px;">
+                                <span class="footer-text">Orders placed recently</span>
+                            </div>
+                        </div>
+                    </div>
+                `
+            )
+            .join("");
+        },
+      };
+
+      // Initialize App
+      app.init();
+    </script>
+  </body>
+</html>
